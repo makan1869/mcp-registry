@@ -1,4 +1,4 @@
-package nl.makan1869.registry.mcp.client;
+package nl.makan1869.registry.mcp;
 
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 

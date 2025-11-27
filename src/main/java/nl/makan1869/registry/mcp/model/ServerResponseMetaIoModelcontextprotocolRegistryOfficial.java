@@ -1,25 +1,36 @@
 package nl.makan1869.registry.mcp.model;
 
-import com.fasterxml.jackson.annotation.*;
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.net.URI;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonValue;
+import java.time.OffsetDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.lang.Nullable;
-
-import jakarta.annotation.Generated;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import org.openapitools.jackson.nullable.JsonNullable;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+
+import java.util.*;
+import jakarta.annotation.Generated;
+
 import java.util.Map;
-import java.util.Objects;
+import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 /**
  * Official MCP registry metadata
  */
 
 @Schema(name = "ServerResponse__meta_io_modelcontextprotocol_registry_official", description = "Official MCP registry metadata")
 @JsonTypeName("ServerResponse__meta_io_modelcontextprotocol_registry_official")
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-11-12T14:19:03.303636+01:00[Europe/Amsterdam]", comments = "Generator version: 7.17.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-11-26T22:12:44.318620+01:00[Europe/Amsterdam]", comments = "Generator version: 7.17.0")
 public class ServerResponseMetaIoModelcontextprotocolRegistryOfficial implements Serializable {
 
   private static final long serialVersionUID = 1L;

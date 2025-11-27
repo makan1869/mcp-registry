@@ -18,18 +18,18 @@ import java.util.*;
 import jakarta.annotation.Generated;
 
 /**
- * V0ServersServerNameVersionsGet404Response
+ * V0ServersServerNameVersionsVersionDelete404Response
  */
 
-@JsonTypeName("_v0_servers__serverName__versions_get_404_response")
+@JsonTypeName("_v0_servers__serverName__versions__version__delete_404_response")
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-11-26T22:12:44.318620+01:00[Europe/Amsterdam]", comments = "Generator version: 7.17.0")
-public class V0ServersServerNameVersionsGet404Response implements Serializable {
+public class V0ServersServerNameVersionsVersionDelete404Response implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private @Nullable String error;
 
-  public V0ServersServerNameVersionsGet404Response error(@Nullable String error) {
+  public V0ServersServerNameVersionsVersionDelete404Response error(@Nullable String error) {
     this.error = error;
     return this;
   }
@@ -39,7 +39,7 @@ public class V0ServersServerNameVersionsGet404Response implements Serializable {
    * @return error
    */
   
-  @Schema(name = "error", example = "Server not found", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @Schema(name = "error", example = "Server version not found", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
   @JsonProperty("error")
   public @Nullable String getError() {
     return error;
@@ -57,8 +57,8 @@ public class V0ServersServerNameVersionsGet404Response implements Serializable {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    V0ServersServerNameVersionsGet404Response v0ServersServerNameVersionsGet404Response = (V0ServersServerNameVersionsGet404Response) o;
-    return Objects.equals(this.error, v0ServersServerNameVersionsGet404Response.error);
+    V0ServersServerNameVersionsVersionDelete404Response v0ServersServerNameVersionsVersionDelete404Response = (V0ServersServerNameVersionsVersionDelete404Response) o;
+    return Objects.equals(this.error, v0ServersServerNameVersionsVersionDelete404Response.error);
   }
 
   @Override
@@ -69,7 +69,7 @@ public class V0ServersServerNameVersionsGet404Response implements Serializable {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class V0ServersServerNameVersionsGet404Response {\n");
+    sb.append("class V0ServersServerNameVersionsVersionDelete404Response {\n");
     sb.append("    error: ").append(toIndentedString(error)).append("\n");
     sb.append("}");
     return sb.toString();

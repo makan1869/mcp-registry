@@ -5,31 +5,49 @@
  */
 package nl.makan1869.registry.mcp.api;
 
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.lang.Nullable;
+import java.time.OffsetDateTime;
+import nl.makan1869.registry.mcp.model.ServerDetail;
+import nl.makan1869.registry.mcp.model.ServerList;
+import nl.makan1869.registry.mcp.model.ServerResponse;
+import nl.makan1869.registry.mcp.model.V0PublishPost403Response;
+import nl.makan1869.registry.mcp.model.V0PublishPost500Response;
+import nl.makan1869.registry.mcp.model.V0PublishPost501Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsGet404Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsVersionDelete401Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsVersionDelete403Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsVersionDelete404Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsVersionDelete500Response;
+import nl.makan1869.registry.mcp.model.V0ServersServerNameVersionsVersionDelete501Response;
+import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import nl.makan1869.registry.mcp.model.*;
-import org.springframework.format.annotation.DateTimeFormat;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.Generated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-11-12T14:19:03.303636+01:00[Europe/Amsterdam]", comments = "Generator version: 7.17.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-11-26T22:12:44.318620+01:00[Europe/Amsterdam]", comments = "Generator version: 7.17.0")
 @Validated
 @Tag(name = "publish", description = "Operations for publishing MCP servers to the registry")
 public interface V0Api {
@@ -48,6 +66,7 @@ public interface V0Api {
      *         or Unauthorized - Invalid or missing authentication token (status code 401)
      *         or Forbidden - Insufficient permissions (status code 403)
      *         or Internal server error (status code 500)
+     *         or Not Implemented - Registry does not support publishing (status code 501)
      */
     @Operation(
         operationId = "v0PublishPost",
@@ -59,13 +78,16 @@ public interface V0Api {
                 @Content(mediaType = "application/json", schema = @Schema(implementation = ServerResponse.class))
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing authentication token", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = V0PublishPost401Response.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete401Response.class))
             }),
             @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions", content = {
                 @Content(mediaType = "application/json", schema = @Schema(implementation = V0PublishPost403Response.class))
             }),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = {
                 @Content(mediaType = "application/json", schema = @Schema(implementation = V0PublishPost500Response.class))
+            }),
+            @ApiResponse(responseCode = "501", description = "Not Implemented - Registry does not support publishing", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0PublishPost501Response.class))
             })
         },
         security = {
@@ -100,6 +122,11 @@ public interface V0Api {
                 }
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                     String exampleString = "{ \"error\" : \"Failed to publish server\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"Publishing is not supported by this registry\" }";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
@@ -199,6 +226,97 @@ public interface V0Api {
                 }
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
                     String exampleString = "{ \"error\" : \"Server not found\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    String PATH_V0_SERVERS_SERVER_NAME_VERSIONS_VERSION_DELETE = "/v0/servers/{serverName}/versions/{version}";
+    /**
+     * DELETE /v0/servers/{serverName}/versions/{version} : Delete specific MCP server version (Optional)
+     * Delete a specific version of an MCP server from the registry.  **Note**: This endpoint is optional for registry implementations and is not implemented by the official MCP registry. It is included in the specification to standardize the deletion mechanism for registry implementations that choose to support it.  Authentication mechanism is registry-specific and may vary between implementations. 
+     *
+     * @param serverName URL-encoded server name (e.g., \&quot;com.example%2Fmy-server\&quot;) (required)
+     * @param version URL-encoded version to delete (e.g., \&quot;1.0.0\&quot; or \&quot;1.0.0%2B20130313144700\&quot; for versions with build metadata) (required)
+     * @return Successfully deleted server version (status code 200)
+     *         or Unauthorized - Invalid or missing authentication token (status code 401)
+     *         or Forbidden - Insufficient permissions (status code 403)
+     *         or Server or version not found (status code 404)
+     *         or Internal server error (status code 500)
+     *         or Not Implemented - Registry does not support deletion (status code 501)
+     */
+    @Operation(
+        operationId = "v0ServersServerNameVersionsVersionDelete",
+        summary = "Delete specific MCP server version (Optional)",
+        description = "Delete a specific version of an MCP server from the registry.  **Note**: This endpoint is optional for registry implementations and is not implemented by the official MCP registry. It is included in the specification to standardize the deletion mechanism for registry implementations that choose to support it.  Authentication mechanism is registry-specific and may vary between implementations. ",
+        tags = { "publish" },
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted server version", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ServerResponse.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing authentication token", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete401Response.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Insufficient permissions", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete403Response.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Server or version not found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete404Response.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete500Response.class))
+            }),
+            @ApiResponse(responseCode = "501", description = "Not Implemented - Registry does not support deletion", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = V0ServersServerNameVersionsVersionDelete501Response.class))
+            })
+        },
+        security = {
+            @SecurityRequirement(name = "bearerAuth")
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.DELETE,
+        value = V0Api.PATH_V0_SERVERS_SERVER_NAME_VERSIONS_VERSION_DELETE,
+        produces = { "application/json" }
+    )
+    default ResponseEntity<ServerResponse> v0ServersServerNameVersionsVersionDelete(
+        @NotNull @Parameter(name = "serverName", description = "URL-encoded server name (e.g., \"com.example%2Fmy-server\")", required = true, in = ParameterIn.PATH) @PathVariable("serverName") String serverName,
+        @NotNull @Parameter(name = "version", description = "URL-encoded version to delete (e.g., \"1.0.0\" or \"1.0.0%2B20130313144700\" for versions with build metadata)", required = true, in = ParameterIn.PATH) @PathVariable("version") String version
+    ) {
+        getRequest().ifPresent(request -> {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"server\" : { \"$schema\" : \"https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json\", \"websiteUrl\" : \"https://modelcontextprotocol.io/examples\", \"name\" : \"io.github.user/weather\", \"description\" : \"MCP server providing weather data and forecasts via OpenWeatherMap API\", \"remotes\" : [ { \"headers\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } ], \"type\" : \"streamable-http\", \"url\" : \"https://api.example.com/mcp\" }, { \"headers\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } ], \"type\" : \"streamable-http\", \"url\" : \"https://api.example.com/mcp\" } ], \"_meta\" : { \"io.modelcontextprotocol.registry/publisher-provided\" : { \"tool\" : \"publisher-cli\", \"version\" : \"1.2.3\", \"buildInfo\" : { \"commit\" : \"abc123def456\", \"timestamp\" : \"2023-12-01T10:30:00Z\", \"pipelineId\" : \"build-789\" } } }, \"title\" : \"Weather API\", \"repository\" : { \"subfolder\" : \"src/everything\", \"source\" : \"github\", \"id\" : \"b94b5f7e-c7c6-d760-2c78-a5e9b8a5b8c9\", \"url\" : \"https://github.com/modelcontextprotocol/servers\" }, \"icons\" : [ { \"sizes\" : [ \"sizes\", \"sizes\" ], \"src\" : \"https://example.com/icon.png\", \"theme\" : \"light\", \"mimeType\" : \"image/png\" }, { \"sizes\" : [ \"sizes\", \"sizes\" ], \"src\" : \"https://example.com/icon.png\", \"theme\" : \"light\", \"mimeType\" : \"image/png\" } ], \"packages\" : [ { \"registryType\" : \"registryType\", \"identifier\" : \"identifier\", \"fileSha256\" : \"fe333e598595000ae021bd27117db32ec69af6987f507ba7a63c90638ff633ce\", \"runtimeArguments\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"description\" : \"description\", \"isRepeated\" : false, \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"type\" : \"positional\", \"value\" : \"value\", \"valueHint\" : \"file_path\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"description\" : \"description\", \"isRepeated\" : false, \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"type\" : \"positional\", \"value\" : \"value\", \"valueHint\" : \"file_path\" } ], \"environmentVariables\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } ], \"runtimeHint\" : \"runtimeHint\", \"packageArguments\" : [ null, null ], \"registryBaseUrl\" : \"https://openapi-generator.tech\", \"transport\" : { \"type\" : \"stdio\" }, \"version\" : \"1.0.2\" }, { \"registryType\" : \"registryType\", \"identifier\" : \"identifier\", \"fileSha256\" : \"fe333e598595000ae021bd27117db32ec69af6987f507ba7a63c90638ff633ce\", \"runtimeArguments\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"description\" : \"description\", \"isRepeated\" : false, \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"type\" : \"positional\", \"value\" : \"value\", \"valueHint\" : \"file_path\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"description\" : \"description\", \"isRepeated\" : false, \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"type\" : \"positional\", \"value\" : \"value\", \"valueHint\" : \"file_path\" } ], \"environmentVariables\" : [ { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" }, { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"variables\" : { \"key\" : { \"isRequired\" : false, \"isSecret\" : false, \"default\" : \"default\", \"format\" : \"string\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } }, \"format\" : \"string\", \"name\" : \"SOME_VARIABLE\", \"description\" : \"description\", \"placeholder\" : \"placeholder\", \"choices\" : [ ], \"value\" : \"value\" } ], \"runtimeHint\" : \"runtimeHint\", \"packageArguments\" : [ null, null ], \"registryBaseUrl\" : \"https://openapi-generator.tech\", \"transport\" : { \"type\" : \"stdio\" }, \"version\" : \"1.0.2\" } ], \"version\" : \"1.0.2\" }, \"_meta\" : { \"io.modelcontextprotocol.registry/official\" : { \"isLatest\" : true, \"publishedAt\" : \"2023-12-01T10:30:00Z\", \"status\" : \"active\", \"updatedAt\" : \"2023-12-01T11:00:00Z\" } } }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"Invalid or expired Registry JWT token\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"You do not have permission to delete this server\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"Server version not found\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"Failed to delete server version\" }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"error\" : \"Deletion is not supported by this registry\" }";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
